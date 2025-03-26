@@ -1,11 +1,14 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 pub struct LinkedList<T: PartialEq> {
-    head: Option<Box<Node<T>>>,
+    head: Option<Rc<RefCell<Node<T>>>>,
     list_type: ListType,
 }
 
 struct Node<T: PartialEq> {
     value: T,
-    next: Option<Box<Node<T>>>,
+    next: Option<Rc<RefCell<Node<T>>>>,
 }
 
 enum ListType {
@@ -16,11 +19,14 @@ enum ListType {
 
 impl<T: PartialEq> LinkedList<T> {
     pub fn new(list_type: ListType) -> Self {
-        Self {head: None, list_type}
+        Self {
+            head: None,
+            list_type,
+        }
     }
 
-    fn new_node(value: T) -> Box<Node<T>> {
-        Box::new(Node {value, next: None})
+    fn new_node(value: T) -> Rc<RefCell<Node<T>>> {
+        Rc::new(RefCell::new(Node { value, next: None }))
     }
 
     pub fn access(&mut self, i: T) -> usize {
@@ -34,100 +40,89 @@ impl<T: PartialEq> LinkedList<T> {
             ListType::Mtf => self.mtf_access(i),
             ListType::Transpose => self.transpose_access(i),
         }
-
     }
 
     fn normal_access(&mut self, i: T) -> usize {
         let mut index = 1;
-        let mut current = self.head.as_mut().unwrap();
+        let mut current = self.head.as_ref().unwrap().clone();
 
-        if current.value == i {
+        if current.borrow().value == i {
             return index;
         }
 
-        while let Some(node) = &current.next {
+        while let Some(next) = &current.clone().borrow_mut().next {
             index += 1;
-            if node.value == i {
+            if next.borrow().value == i {
                 return index;
             }
 
-            current = current.next.as_mut().unwrap();
+            current = next.clone();
         }
 
-        current.next = Some(Self::new_node(i));
+        current.borrow_mut().next = Some(Self::new_node(i));
         index
     }
 
     fn mtf_access(&mut self, i: T) -> usize {
         let mut index = 1;
-        let mut prev = self.head.as_mut().unwrap();
-        let mut current = &mut prev.next;
+        let mut current = self.head.as_ref().unwrap().clone();
 
-        if prev.value == i {
+        if current.borrow().value == i {
             return index;
         }
 
-        while let Some(node) = current.as_mut() {
+        while let Some(next) = &current.clone().borrow_mut().next {
             index += 1;
-
-            if node.value == i {
-                prev.next = node.next;
-                node.next = self.head;
-                self.head = Some(*node);
+            if next.borrow().value == i {
+                current.borrow_mut().next = next.borrow().next.clone();
+                next.borrow_mut().next = self.head.clone();
+                self.head = Some(next.clone());
                 return index;
             }
 
-            prev = node;
-            current = &mut node.next;
+            current = next.clone();
         }
 
-        prev.next = Some(Self::new_node(i));
+        current.borrow_mut().next = Some(Self::new_node(i));
         index
     }
 
     fn transpose_access(&mut self, i: T) -> usize {
-        let mut index = 1;
-        let mut prev_prev = head;
-        let mut prev;
+        let mut index = 2;
+        let mut prev = self.head.as_ref().unwrap().clone();
         let mut current;
 
-        if prev_prev.value == i {
+        if prev.borrow().value == i {
+            return 1;
+        }
+
+        match &prev.borrow().next {
+            Some(node) => current = node.clone(),
+            None => {
+                prev.borrow_mut().next = Some(Self::new_node(i));
+                return 1;
+            }
+        };
+
+        if current.borrow().value == i {
             return index;
         }
 
-        match prev_prev.next {
-            Some(node) => {
-                if node.value == i {
-                    prev_prev.next = node.next;
-                    node.next = Some(prev_prev);
-                    self.head = Some(*node);
-                    return index;
-                }
-
-                prev = node;
-                current = node.next;
-            }
-            None => {
-                prev_prev.next = Some(Self::new_node(i));
-                return index;
-            }
-        }
-
-        while let Some(node) = &mut current {
+        while let Some(next) = &current.clone().borrow().next {
             index += 1;
 
-            if node.value == i {
-                prev.next = node.next;
-                node.next = Some(head);
-                self.head = Some(*node);
+            if next.borrow().value == i {
+                prev.borrow_mut().next = Some(next.clone());
+                current.borrow_mut().next = next.borrow().next.clone();
+                next.borrow_mut().next = Some(current.clone());
                 return index;
             }
 
-            prev = current;
-            current = node.next;
+            prev = current.clone();
+            current = next.clone();
         }
 
-        current.next = Some(Self::new_node(i));
+        current.borrow_mut().next = Some(Self::new_node(i));
         index
     }
 }
