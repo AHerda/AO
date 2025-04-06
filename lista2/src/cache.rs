@@ -1,9 +1,9 @@
-use rand::prelude::*;
 use std::{
     collections::{HashMap, VecDeque},
     hash::Hash,
 };
 
+#[derive(Copy, Clone, Debug)]
 pub enum CacheType {
     Fifo,
     Fwf,
@@ -11,6 +11,19 @@ pub enum CacheType {
     Lfu,
     Rand,
     Rma,
+}
+
+impl std::fmt::Display for CacheType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CacheType::Fifo => write!(f, "FIFO"),
+            CacheType::Fwf => write!(f, "FWF"),
+            CacheType::Lru => write!(f, "LRU"),
+            CacheType::Lfu => write!(f, "LFU"),
+            CacheType::Rand => write!(f, "RAND"),
+            CacheType::Rma => write!(f, "RMA"),
+        }
+    }
 }
 
 pub struct Cache<T>
@@ -152,7 +165,7 @@ where
                 self.rma_marker
                     .as_mut()
                     .unwrap()
-                    .into_iter()
+                    .iter_mut()
                     .for_each(|marker| *marker = false);
                 unmarked_count = self.size;
             }
@@ -176,10 +189,10 @@ where
 
             self.data.remove(pos);
             self.rma_marker.as_mut().unwrap().remove(pos);
-
-            self.data.push_back(page);
-            self.rma_marker.as_mut().unwrap().push(false);
         }
+
+        self.data.push_back(page);
+        self.rma_marker.as_mut().unwrap().push(false);
     }
 
     fn rma_update(&mut self, page: &T) {
