@@ -2,14 +2,7 @@
 
 #set heading(numbering: "1.")
 #set text(lang: "pl")
-#set par(
-  first-line-indent: 1em,
-  spacing: 1.2em,
-  justify: true,
-)
 
-//#plot2(80, "Double_Harmonic")
-//#plot2(100, "Double_Harmonic")
 #align(top + center)[
   #text(size: 24pt, [Algorytmy On-Line \ Lista 2])
 
@@ -18,6 +11,13 @@
   #datetime.today().display()
 ]
 
+#set par(
+  first-line-indent: 1em,
+  spacing: 1.2em,
+  justify: true,
+  hanging-indent: -1em,
+)
+
 = Treść zadania
 
 Dla problemu stronicowania rozważamy cache o pojemności k dla zbioru n stron żą-
@@ -25,13 +25,14 @@ danych zgodnie z podanym rozkładem. Zbadaj średni koszt żądania strony dla p
 rozkładów, algorytmów, k i n.
 
 Rozważ następujące rozkłady zmiennej losowej $X$ dla $n$ elementów (ze zbioru ${1, dots , n}$):
+
 - jednostajny $P r[X = i] = 1 / n$
 - harmoniczny $P r[X = i] = 1 / (i dot H_n)$, gdzie $H_n$ jest liczbą harmoniczną,
 - dwuharmoniczny $P r[X = i] = 1 / (i^2 dot hat(H)_n)$, gdzie $hat(H)_n = sum_(i=1) 1 / i^2$ jest n-tą liczbą dwuharmoniczną,
 - geometryczny $P r[X = i] = 1 / 2^i$, dla $i < n$, i $P r[X = n] = 1 / 2^(n−1)$.
 
-
 Zastosuj następujące metody obsługi cache’a:
+
 - FIRST IN FIRST OUT (FIFO),
 - FLUSH WHEN FULL (FWF),
 - LEAST RECENTLY USED (LRU),
@@ -66,3 +67,13 @@ Na @Har100 widać porównanie opisywanych metod obsługi chache'a względem ich 
 
 
 == Rozkład geometryczny
+
+#plot2(100, "Geometric") <Geo100>
+
+@Geo100 orzedstawia wykres ze stronoami losowanymi w rozkładzie geometrycznym. Kolejność jest mniejwięcej podobna jak na poprzednich wykresach. Jedynie tym razem dla coraz większych wartości $k$ wartości średnie maleją wolniej niż nawet @DHar100. Tym razem wartości średnie RMA oraz LRU są bardzo podbne i nie ma między nimi widocznej różnicy jak na poprzednich wykresach. Jeśli się przyjrzeć można zauważyć że dla małych wartości $k$, np $k = 10$ LRU jest nawet mniejsze. Co ciekawe zmienia się to dla mniejszych wartości $n$.
+
+#plot2(40, "Geometric")
+
+= Wnioski
+
+Po wykresach łatwo można zauważyć że im bardziej niesymetryczny jest rozkład tym bardziej algorytmy dopasowujące się do niego będą mieć przewagę. Tego typu algorytmem jesst np. LFU. Dla większzych zbiorów stron i dla większych cache'y ta różnica bardzo szybko maleje. Metofy FIFO i RAND pozostają prawie dokładnie równe przez wszystkie eksperymenty co można rozumieć jako całkowitą losowość pierwszego elementu w kolejce w metodzie FIFO.
