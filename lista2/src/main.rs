@@ -30,24 +30,31 @@ fn experiment() {
         ];
         for distribution in &mut distributions {
             println!("\tRunning experiment for distribution = {}", distribution);
-            for cache_type in &cache_types {
-                println!("\t\tRunning experiment for cache_type = {}", cache_type);
-                let filename = format!(
-                    "data/cache-{}_n-{}_dist-{}.csv",
-                    cache_type, n, distribution
-                );
-                let mut file = File::create(&filename).expect("Unable to create file");
-                writeln!(file, "k, avg_cost").expect("Unable to write to file");
 
-                for k in &ks {
+            let filename = format!("data/avg_cost_n-{}_dist-{}.csv", n, distribution);
+            let mut file = File::create(&filename).expect("Unable to create file");
+            let mut headers = vec!["k".to_owned()];
+
+            for cache_type in &cache_types {
+                headers.push(format!("{}", cache_type));
+            }
+            writeln!(file, "{}", headers.join(",")).expect("Unable to write to file");
+
+            for k in &ks {
+                println!("\t\tRunning experiment for k = {}", k);
+
+                let mut row = vec![format!("{}", k)];
+
+                for cache_type in &cache_types {
                     let mut cache = Cache::new(k.clone(), Some(cache_type.clone()));
                     let hits: usize = (0..num_of_tests)
                         .map(|_| cache.get_page(distribution.sample()))
                         .sum();
                     let avg_cost = hits as f64 / num_of_tests as f64;
 
-                    writeln!(file, "{}, {}", k, avg_cost).expect("Unable to write to file");
+                    row.push(format!("{}", avg_cost));
                 }
+                writeln!(file, "{}", row.join(",")).expect("Unable to write to file");
             }
         }
     });

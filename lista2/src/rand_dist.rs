@@ -30,7 +30,7 @@ impl RandDist {
     pub fn new(dist_type: RandDistType, max: usize) -> Self {
         let dist = match dist_type {
             RandDistType::Uniform => {
-                WeightedIndex::new((1..=max).map(|i| 1.0 / (max as f64)).collect::<Vec<f64>>())
+                WeightedIndex::new((1..=max).map(|_| 1.0 / (max as f64)).collect::<Vec<f64>>())
             }
             RandDistType::Harmonic => {
                 let harmonic = (1..=max).fold(0.0, |acc, i| acc + (1.0 / i as f64));
