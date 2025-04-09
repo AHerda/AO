@@ -11,6 +11,7 @@ pub enum CacheType {
     Lfu,
     Rand,
     Rma,
+    Rma2,
 }
 
 impl std::fmt::Display for CacheType {
@@ -22,6 +23,7 @@ impl std::fmt::Display for CacheType {
             CacheType::Lfu => write!(f, "LFU"),
             CacheType::Rand => write!(f, "RAND"),
             CacheType::Rma => write!(f, "RMA"),
+            CacheType::Rma2 => write!(f, "RMA2"),
         }
     }
 }
@@ -50,7 +52,7 @@ where
                 _ => None,
             },
             rma_marker: match cache_type {
-                Some(CacheType::Rma) => Some(Vec::with_capacity(size)),
+                Some(CacheType::Rma) | Some(CacheType::Rma2) => Some(Vec::with_capacity(size)),
                 _ => None,
             },
             cache_type: cache_type.unwrap_or(CacheType::Fifo),
@@ -71,7 +73,7 @@ where
         match self.cache_type {
             CacheType::Lru => self.lru_update(page),
             CacheType::Lfu => self.lfu_update(page),
-            CacheType::Rma => self.rma_update(page),
+            CacheType::Rma | CacheType::Rma2 => self.rma_update(page),
             _ => (),
         }
     }
@@ -83,7 +85,8 @@ where
             CacheType::Lru => self.lru_add(page),
             CacheType::Lfu => self.lfu_add(page),
             CacheType::Rand => self.rand_add(page),
-            CacheType::Rma => self.rma_add(page),
+            CacheType::Rma => self.rma_add(page, true),
+            CacheType::Rma2 => self.rma_add(page, false),
         }
     }
 
@@ -151,7 +154,7 @@ where
         self.data.push_back(page);
     }
 
-    fn rma_add(&mut self, page: T) {
+    fn rma_add(&mut self, page: T, marked: bool) {
         if self.data.len() == self.size {
             let mut unmarked_count = self
                 .rma_marker
@@ -192,7 +195,7 @@ where
         }
 
         self.data.push_back(page);
-        self.rma_marker.as_mut().unwrap().push(false);
+        self.rma_marker.as_mut().unwrap().push(marked);
     }
 
     fn rma_update(&mut self, page: &T) {

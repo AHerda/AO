@@ -18,7 +18,8 @@ methods = [
     "LRU",
     "LFU",
     "RAND",
-    "RMA"
+    "RMA",
+    "RMA2"
 ]
 
 

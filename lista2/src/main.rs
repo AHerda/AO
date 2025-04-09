@@ -17,6 +17,7 @@ fn experiment() {
         CacheType::Lfu,
         CacheType::Rand,
         CacheType::Rma,
+        CacheType::Rma2,
     ];
 
     ns.par_iter().for_each(|&n| {
