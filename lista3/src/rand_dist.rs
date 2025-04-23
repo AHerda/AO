@@ -6,6 +6,7 @@ pub struct RandDist {
     rng: ThreadRng,
 }
 
+#[derive(Clone, Copy)]
 pub enum RandDistType {
     Uniform,
     Harmonic,

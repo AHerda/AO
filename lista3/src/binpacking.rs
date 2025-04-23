@@ -1,5 +1,6 @@
 use rand::prelude::*;
 
+#[derive(Clone, Copy)]
 pub enum PackType {
     NextFit,
     RandomFit,
@@ -18,7 +19,6 @@ impl std::fmt::Display for PackType {
             PackType::WorstFit => write!(f, "Worst"),
         }
     }
-
 }
 
 pub struct BinPacking {
@@ -28,7 +28,10 @@ pub struct BinPacking {
 
 impl BinPacking {
     pub fn new(pack_type: PackType) -> Self {
-        Self { bins: vec![ 0.0 ], pack_type }
+        Self {
+            bins: vec![0.0],
+            pack_type,
+        }
     }
 
     pub fn optimal_packing(weights: &[f64]) -> usize {
@@ -43,19 +46,33 @@ impl BinPacking {
                 } else {
                     None
                 }
-            },
-            PackType::RandomFit => {
-                Some( *self.bins.iter().enumerate().filter_map(|(idx, &x)| { if x + weight <= 1.0 { Some(idx) } else { None } }).collect::<Vec<_>>().choose(&mut rand::rng())? )
-            },
-            PackType::FirstFit => {
-                self.bins.iter().position(|&x| x + weight <= 1.0)
-            },
-            PackType::BestFit => {
-                Some ( self.bins.iter().enumerate().filter(|(_, &x)| x + weight <= 1.0).max_by(|(_, x), (_, y)| x.total_cmp(y))?.0 )
-            },
-            PackType::WorstFit => {
-                Some ( self.bins.iter().enumerate().filter(|(_, &x)| x + weight <= 1.0).min_by(|(_, x), (_, y)| x.total_cmp(y))?.0 )
-            },
+            }
+            PackType::RandomFit => Some(
+                *self
+                    .bins
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(idx, &x)| if x + weight <= 1.0 { Some(idx) } else { None })
+                    .collect::<Vec<_>>()
+                    .choose(&mut rand::rng())?,
+            ),
+            PackType::FirstFit => self.bins.iter().position(|&x| x + weight <= 1.0),
+            PackType::BestFit => Some(
+                self.bins
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, &x)| x + weight <= 1.0)
+                    .max_by(|(_, x), (_, y)| x.total_cmp(y))?
+                    .0,
+            ),
+            PackType::WorstFit => Some(
+                self.bins
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, &x)| x + weight <= 1.0)
+                    .min_by(|(_, x), (_, y)| x.total_cmp(y))?
+                    .0,
+            ),
         }
     }
 
