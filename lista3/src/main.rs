@@ -25,7 +25,7 @@ fn experiment(pack_type: &PackType, dist_type: &RandDistType) -> f64 {
 }
 
 fn experiments() {
-    let num_of_tests = 1_000_usize;
+    let num_of_tests = 1_000_000_usize;
     let pack_types = vec![
         PackType::NextFit,
         PackType::RandomFit,
@@ -44,7 +44,7 @@ fn experiments() {
     let mut file = File::create(&filename).expect("Unable to create file");
     writeln!(
         file,
-        "distributions,{}",
+        "Distributions,{}",
         pack_types
             .iter()
             .map(|x| format!("{}", x))
