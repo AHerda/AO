@@ -40,8 +40,7 @@
       y-grid: true,
       x-label: "D",
       y-label: "Average cost",
-      // x-tick-step: 1.0,
-      // y-decimals: 5,
+      y-break: true,
       {
         for (i, color) in range(1, results.at(0).len()).zip(colors) {
           plot.add(

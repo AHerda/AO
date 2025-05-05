@@ -23,7 +23,7 @@ fn experiment(d: usize, dist: RandDistType, structure: GraphStructure, algo: Mig
 }
 
 fn experiments() {
-    let num_of_tests = 1_00_usize;
+    let num_of_tests = 1_000_usize;
     let distributions_type = vec![
         RandDistType::Uniform,
         RandDistType::Harmonic,
@@ -40,7 +40,7 @@ fn experiments() {
 
     distributions_type.iter().for_each(|dist_type| {
         println!("Running experiments for distribution: {}", dist_type);
-        let filename = format!("data/2dist-{}.csv", dist_type);
+        let filename = format!("data/dist-{}.csv", dist_type);
         let mut file = File::create(&filename).expect("Unable to create file");
         writeln!(
             file,

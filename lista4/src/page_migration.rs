@@ -6,19 +6,19 @@ pub enum GraphStructure {
 
 impl GraphStructure {
     fn distance(&self, a: &usize, b: &usize) -> usize {
-        if *a > 64 || *b > 64 {
+        if *a >= 64 || *b >= 64 {
             panic!("Invalid page number");
         }
         match self {
-            GraphStructure::Hypercube => ((a - 1) ^ (b - 1)).count_ones() as usize,
+            GraphStructure::Hypercube => (a ^ b).count_ones() as usize,
             GraphStructure::Torus => (0..(3 * 2))
                 .step_by(2)
                 .map(
-                    |i| match (((a - 1) >> i) % 4).abs_diff(((b - 1) >> i) % 4) {
+                    |i| match ((a >> i) % 4).abs_diff((b >> i) % 4) {
                         0 => 0,
                         2 => 2,
                         1 | 3 => 1,
-                        _ => panic!("Invalid distance calculation"),
+                        _ => unreachable!(),
                     },
                 )
                 .sum(),
@@ -92,9 +92,11 @@ impl PageMigration {
 
     /// MOVE-TO-MIN - dzielimy σ na fazy długości D. W trakcie fazy nie przesuwamy strony. Po fazie zapytań v_1, . . . , v_D przenosimy zasób do wierzchołka m takiego, że minimalizuje SUM^D_(i=1) d(m, v_i).
     fn move_to_min_migrate(&mut self, target: usize) -> usize {
+        let mut cost = self.graph_structure.distance(&self.page, &target);
         self.previous_requests.as_mut().unwrap().push(target);
+
         if self.previous_requests.as_ref().unwrap().len() == self.moving_cost {
-            let min = (1..=64)
+            let min = (0..64)
                 .min_by_key(|x| {
                     self.previous_requests
                         .as_ref()
@@ -103,24 +105,23 @@ impl PageMigration {
                         .fold(0, |acc, y| acc + self.graph_structure.distance(x, y))
                 })
                 .expect("No minimum found");
-            // println!("Moving to min: {}", min);
-            let cost = self.moving_cost * self.graph_structure.distance(&self.page, &min);
+
+            cost += self.moving_cost * self.graph_structure.distance(&self.page, &min);
             self.previous_requests.as_mut().unwrap().clear();
             self.page = min;
-            cost
-        } else {
-            self.graph_structure.distance(&self.page, &target)
         }
+
+        cost
     }
 
     /// Algorytm COINFLIP dla dowolnych grafów. Przy każdym żądaniu z prawdopodobieństwem 1 / D skopiuj zasób z najbliższego źródła.
     fn random_flip_migrate(&mut self, target: usize) -> usize {
+        let mut cost = self.graph_structure.distance(&self.page, &target);
         if rand::random_bool(1. / (2 * self.moving_cost) as f64) {
-            let cost = self.moving_cost * self.graph_structure.distance(&self.page, &target);
+            cost += self.moving_cost * self.graph_structure.distance(&self.page, &target);
             self.page = target;
-            cost
-        } else {
-            self.graph_structure.distance(&self.page, &target)
         }
+
+        cost
     }
 }

@@ -69,7 +69,7 @@ impl RandDist {
     }
 
     pub fn sample(&mut self) -> usize {
-        self.dist.sample(&mut self.rng) + 1
+        self.dist.sample(&mut self.rng)
     }
 
     pub fn sample_n(&mut self, n: usize) -> Vec<usize> {
