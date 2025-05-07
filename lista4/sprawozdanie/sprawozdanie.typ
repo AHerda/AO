@@ -37,7 +37,9 @@ Przeprowadź eksperymenty dla podanych algorytmów, grafów i rozkładów. Poró
 = Wyniki eksperymentów
 
 #for dist in data.dists [
-  #plotting.plot2(dist)
+  #for variant in data.variants [
+    #plotting.plot2(dist, variant)
+  ]
 ]
 
 Jak widać na powyższych wykresach algorytm #smallcaps[MoveTo Min] jest lepszy od algorytmu #smallcaps[CoinFlip] dla rozkładu harmonicznego i dwuharmoniczego. W przypadku rozkładu jednostajnego algorytm #smallcaps[CoinFlip] jest lepszy od algorytmu #smallcaps[MoveToMin]. Można zauważyć, że dla grafu o kształcie hiperkostki średnie koszty mają asymptotykę zbliżoną do $O(D)$, a dla rozkładu kształtu trójwymiarowego torusa wydaje się to być zbliżone do $O(log D)$. Wyjątkiem jest rozkład harmoniczny gdzie algorytm #smallcaps[MoveToMin] na grafie w kształcie torusa maleje wraz ze wzrostem $D$.

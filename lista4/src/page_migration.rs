@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum GraphStructure {
     Hypercube,
     Torus,
@@ -35,7 +35,7 @@ impl std::fmt::Display for GraphStructure {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum MigrationType {
     MoveToMin,
     CoinFlip,

@@ -65,11 +65,11 @@
   )
 }
 
-#let plot2(dist) = {
-  let re = "dist-" + dist
+#let plot2(dist, variant) = {
+  let re = "dist-" + dist + "_(alg|struct)-" + variant
   let pos = plots.map(x => x.at(0)).position(x => x.contains(regex(re)))
   figure(
     plots.at(pos).at(1),
-    caption: "Average cost of page migration with " + dist.replace("_", " ") + " distribution",
+    caption: "Average cost of page migration with " + dist.replace("_", " ") + " distribution and " + variant,
   )
 }
